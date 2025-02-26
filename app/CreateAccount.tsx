@@ -13,7 +13,8 @@ export default function HomeScreen() {
 	const [password, setPassword] = useState("")
 	const [confirmpassword, setConfirmpassword] = useState("")
 	const [toscheck, setToscheck] = useState(false)
-	const [isloading, setIsloading] = useState(false)
+	const [valid, setValid] = useState(false)
+	const onPress = () => {}
 
 	return (
 		<ParallaxScrollView
@@ -24,66 +25,67 @@ export default function HomeScreen() {
 					style={styles.reactLogo}
 				/>
 			}>
-		<ThemedView style={styles.titleContainer}>
-			<ThemedText type="title">Create an Account</ThemedText>
-		</ThemedView>
 
-		<ThemedView style={styles.stepContainer}>
-			<ThemedView style={styles.formInputWrapper}>
-				<Octicons name="person" size={20} color="#FFF7" />
-				<TextInput
-					style={styles.input}
-					cursorColor='#FFFA'
-					placeholderTextColor="#FFF7"
-					value={username}
-					onChangeText={username => setUsername(username)}
-					placeholder='User Name' />
+			<ThemedView style={styles.titleContainer}>
+				<ThemedText type="title">Create an Account</ThemedText>
 			</ThemedView>
-		</ThemedView>
-		<ThemedView style={styles.stepContainer}>
-			<ThemedView style={styles.formInputWrapper}>
-				<Octicons name="shield-lock" size={20} color="#FFF7" />
-				<TextInput
-					style={styles.input}
-					cursorColor='#FFFA'
-					placeholderTextColor="#FFF7"
-					value={password}
-					onChangeText={password => setPassword(password)}
-					secureTextEntry={true}
-					autoCapitalize="none"
-					placeholder='Password' />
-			</ThemedView>
-		</ThemedView>
-		<ThemedView style={styles.stepContainer}>
-			<ThemedView style={styles.formInputWrapper}>
-				<Octicons name="shield-lock" size={20} color="#FFF7" />
-				<TextInput
-					style={styles.input}
-					cursorColor='#FFFA'
-					placeholderTextColor="#FFF7"
-					value={confirmpassword}
-					onChangeText={confirmpassword => setConfirmpassword(confirmpassword)}
-					secureTextEntry={true}
-					autoCapitalize="none"
-					placeholder='Confirm Password' />
-			</ThemedView>
-		</ThemedView>
 
-		<ThemedView style={styles.stepContainer}>
-			<ThemedView style={styles.checkboxcontainer}>
-				<Checkbox 
-					style={styles.checkbox} 
-					value={toscheck} 
-					onValueChange={setToscheck} />
-				<ThemedText>Accept the Terms of Service</ThemedText>
+			<ThemedView style={styles.stepContainer}>
+				<ThemedView style={styles.formInputWrapper}>
+					<Octicons name="person" size={20} color="#FFF7" />
+					<TextInput
+						style={styles.input}
+						cursorColor='#FFFA'
+						placeholderTextColor="#FFF7"
+						value={username}
+						onChangeText={username => setUsername(username)}
+						placeholder='User Name' />
+				</ThemedView>
 			</ThemedView>
-		</ThemedView>
+			<ThemedView style={styles.stepContainer}>
+				<ThemedView style={styles.formInputWrapper}>
+					<Octicons name="shield-lock" size={20} color="#FFF7" />
+					<TextInput
+						style={styles.input}
+						cursorColor='#FFFA'
+						placeholderTextColor="#FFF7"
+						value={password}
+						onChangeText={password => setPassword(password)}
+						secureTextEntry={true}
+						autoCapitalize="none"
+						placeholder='Password' />
+				</ThemedView>
+			</ThemedView>
+			<ThemedView style={styles.stepContainer}>
+				<ThemedView style={styles.formInputWrapper}>
+					<Octicons name="shield-lock" size={20} color="#FFF7" />
+					<TextInput
+						style={styles.input}
+						cursorColor='#FFFA'
+						placeholderTextColor="#FFF7"
+						value={confirmpassword}
+						onChangeText={confirmpassword => setConfirmpassword(confirmpassword)}
+						secureTextEntry={true}
+						autoCapitalize="none"
+						placeholder='Confirm Password' />
+				</ThemedView>
+			</ThemedView>
 
-		<ThemedView style={styles.stepContainer}>
-			<TouchableHighlight style={styles.button}>
-				<ThemedText style={styles.buttonText} type='defaultSemiBold'>Create Account</ThemedText>
-			</TouchableHighlight>
-		</ThemedView>
+			<ThemedView style={styles.stepContainer}>
+				<ThemedView style={styles.checkboxcontainer}>
+					<Checkbox 
+						style={styles.checkbox} 
+						value={toscheck} 
+						onValueChange={setToscheck} />
+					<ThemedText>Accept the Terms of Service</ThemedText>
+				</ThemedView>
+			</ThemedView>
+
+			<ThemedView style={styles.stepContainer}>
+				<TouchableHighlight style={styles.button} onPress={onPress} activeOpacity={50}>
+					<ThemedText style={styles.buttonText} type='defaultSemiBold'>Create Account</ThemedText>
+				</TouchableHighlight>
+			</ThemedView>
 
 		</ParallaxScrollView>
 	);
@@ -129,11 +131,11 @@ const styles = StyleSheet.create({
 		borderWidth: 1,
 		borderRadius: 6,
 		alignItems: "center",
-		backgroundColor: "#2196F3"
+		backgroundColor: "#2196F3",
+		padding: 10
 	},
 	buttonText: {
 		textAlign: 'center',
-		padding: 15,
 		color: 'white'
 	},
 	checkboxcontainer: {

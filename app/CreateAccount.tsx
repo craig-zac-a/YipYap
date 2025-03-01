@@ -6,11 +6,13 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Octicons } from '@expo/vector-icons';
 import { Checkbox } from 'expo-checkbox';
-import { Link } from 'expo-router';
+import { Link, useNavigation } from 'expo-router';
+import { navigate } from 'expo-router/build/global-state/routing';
 
 export default function HomeScreen() {
-	const [username, setUsername] = useState("")
+	const navigation = useNavigation();
 	const [email, setEmail] = useState("")
+	const [usedemail, setUsedemail] = useState(false)
 	const [password, setPassword] = useState("")
 	const [restriced, setRestricted] = useState(true)
 	const [confirmpassword, setConfirmpassword] = useState("")
@@ -21,7 +23,6 @@ export default function HomeScreen() {
 		restrictPassword();
 		verifyPassword();
 		setInvalid(false);
-		if (username.length == 0) {setInvalid(true)}
 		if (email.length == 0) {setInvalid(true)}
 		if (!restriced) {setInvalid(true)}
 		if (!verified) {setInvalid(true)}
@@ -33,6 +34,30 @@ export default function HomeScreen() {
 	const restrictPassword = () => {
 		var val = password.length >= 8 && /[a-z]/i.test(password) && /[0-9]/.test(password)
 		setRestricted(val);
+	}
+
+	const createAccount = async () => {
+		try {
+			const response = await fetch('http://99.32.47.49:3000/account/register', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({email: email, password: password}),
+			});
+
+			if (!response.ok) {
+				console.warn("Account created");
+				setUsedemail(true);
+				setEmail("");
+				return [];
+			}
+			navigation.goBack();
+			
+		} catch (error) {
+			console.error("Error creating account:", error);
+			return [];
+		}
 	}
 
 	return (
@@ -52,27 +77,15 @@ export default function HomeScreen() {
 				</ThemedView>
 
 				<ThemedView style={styles.stepContainer}>
-					<ThemedView style={styles.formInputWrapper}>
-						<Octicons name="person" size={20} color="#FFF7" />
-						<TextInput
-							style={styles.input}
-							cursorColor='#FFFA'
-							placeholderTextColor="#FFF7"
-							value={username}
-							onChangeText={(username) => {setUsername(username); checkFilled();}}
-							placeholder='User Name' />
-					</ThemedView>
-				</ThemedView>
-				<ThemedView style={styles.stepContainer}>
-					<ThemedView style={styles.formInputWrapper}>
+					<ThemedView style={[styles.formInputWrapper, {backgroundColor: usedemail ? "#D88090" : "#0005"}]}>
 						<Octicons name="mail" size={20} color="#FFF7" />
 						<TextInput
 							style={styles.input}
 							cursorColor='#FFFA'
 							placeholderTextColor="#FFF7"
 							value={email}
-							onChangeText={(email) => {setEmail(email); checkFilled();}}
-							placeholder='Email' />
+							onChangeText={(email) => {setEmail(email); setUsedemail(false); checkFilled();}}
+							placeholder={usedemail ? 'Email in use' : 'Email'} />
 					</ThemedView>
 				</ThemedView>
 				<ThemedView style={styles.stepContainer}>
@@ -122,7 +135,7 @@ export default function HomeScreen() {
 					style={({pressed}) => [
 						{backgroundColor: pressed ? "#0166D3" : "#2196F3"}, 
 						styles.button]} 
-						onPress={() => {}}
+						onPress={createAccount}
 						disabled={invalid}>
 							<ThemedText style={styles.buttonText} type='defaultSemiBold'>Create Account</ThemedText>
 					</Pressable>

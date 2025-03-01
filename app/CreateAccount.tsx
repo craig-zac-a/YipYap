@@ -85,6 +85,7 @@ export default function HomeScreen() {
 							placeholderTextColor="#FFF7"
 							value={email}
 							onChangeText={(email) => {setEmail(email); setUsedemail(false); checkFilled();}}
+							autoCapitalize="none"
 							placeholder={usedemail ? 'Email in use' : 'Email'} />
 					</ThemedView>
 				</ThemedView>

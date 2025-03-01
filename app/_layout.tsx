@@ -1,6 +1,7 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { Stack, Tabs } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
@@ -10,6 +11,8 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
+
+const Tab = createBottomTabNavigator();
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -29,10 +32,10 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
+      <Tabs screenOptions={{ tabBarStyle: { display: 'none' } }}>
+        <Tabs.Screen name="index" options={{ headerShown: false }} />
+        <Tabs.Screen name="+not-found" />
+      </Tabs>
       <StatusBar style="auto" />
     </ThemeProvider>
   );

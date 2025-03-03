@@ -1,43 +1,139 @@
-import { StyleSheet, View, Button, TextInput } from 'react-native';
+import { StyleSheet, TextInput, Pressable, Image } from 'react-native';
+import React, { useState } from 'react';
+import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { Octicons } from '@expo/vector-icons';
+
 
 export default function Login({ navigation }: any) {
-  return (
-    <ThemedView style={styles.container}>
-      <ThemedText type="title">Login</ThemedText>
+  const [email, setEmail] = useState("")
+  const [loginFail, setloginFail] = useState(false)
+  const [password, setPassword] = useState("")
 
-      {/* <View style={styles.buttonContainer}>
-        <Button title="Back to Home" onPress={() => navigation.goBack()} />
-      </View> */}
-    </ThemedView>
+  const login = async () => {
+    try {
+      const response = await fetch('http://99.32.47.49:3000/account/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: email, password: password }),
+      });
+      console.log("Request sent")
+      if (!response.ok) {
+        setloginFail(true);
+        setEmail("");
+        setPassword("");
+        throw new Error(`Response status: ${response.status}`);
+      }
+      console.log("Logged In")
+    } catch (error) {
+      console.error("Error logging in:", error);
+    }
+  }
+
+  return (
+    <Pressable style={{ width: "100%", height: "100%" }}>
+      <ParallaxScrollView
+        headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
+        headerImage={
+          <Image
+            source={require('@/assets/images/partial-react-logo.png')}
+            style={styles.reactLogo}
+          />
+        }>
+        <ThemedView style={styles.titleContainer}>
+          <ThemedText type="title">Login</ThemedText>
+        </ThemedView>
+        <ThemedView style={styles.stepContainer}>
+          <ThemedView style={[styles.formInputWrapper, { backgroundColor: loginFail ? "#D88090" : "#0005" }]}>
+            <Octicons name="mail" size={20} color="#FFF7" />
+            <TextInput
+              style={styles.input}
+              cursorColor='#FFFA'
+              placeholderTextColor="#FFF7"
+              value={email}
+              onChangeText={(email) => { setEmail(email); }}
+              autoCapitalize="none"
+              placeholder='Email' />
+          </ThemedView>
+        </ThemedView>
+        <ThemedView style={styles.stepContainer}>
+          <ThemedView style={[styles.formInputWrapper, { backgroundColor: loginFail ? "#D88090" : "#0005" }]}>
+            <Octicons name="shield-lock" size={20} color="#FFF7" />
+            <TextInput
+              style={styles.input}
+              cursorColor='#FFFA'
+              placeholderTextColor="#FFF7"
+              value={password}
+              onChangeText={(password) => { setPassword(password); }}
+              secureTextEntry={true}
+              autoCapitalize="none"
+              placeholder='Password' />
+          </ThemedView>
+        </ThemedView>
+        <ThemedView style={styles.stepContainer}>
+          <Pressable
+            style={({ pressed }) => [
+              { backgroundColor: pressed ? "#0166D3" : "#2196F3" },
+              styles.button]}
+            onPress={login}>
+            <ThemedText style={styles.buttonText} type='defaultSemiBold'>Login</ThemedText>
+          </Pressable>
+        </ThemedView>
+      </ParallaxScrollView>
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
+  reactLogo: {
+    height: 178,
+    width: 290,
+    bottom: 0,
+    left: 0,
+    position: 'absolute',
   },
-  inputContainer: {
-    width: '100%',
-    maxWidth: 300,
-    gap: 16,
+  titleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  stepContainer: {
+    marginBottom: 8,
+    alignItems: 'center',
+  },
+  password: {
+    fontSize: 8,
+    color: "#FFF7"
+  },
+  formInputWrapper: {
+    width: '90%',
+    height: 55,
+    backgroundColor: "#0005",
+    borderWidth: 1,
+    borderRadius: 6,
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 0
   },
   input: {
-    height: 40,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    paddingHorizontal: 8,
-    borderRadius: 8,
-    marginBottom: 16,
+    width: "90%",
+    height: "100%",
+    marginLeft: 10,
+    color: "#FFFA"
   },
-  buttonContainer: {
-    gap: 16,
-    width: '100%',
-    maxWidth: 300,
-    alignItems: 'center',
+  button: {
+    width: "90%",
+    height: 55,
+    borderWidth: 1,
+    borderRadius: 6,
+    alignItems: "center",
+    padding: 12
+  },
+  buttonText: {
+    textAlign: 'center',
+    color: 'white'
   },
 });

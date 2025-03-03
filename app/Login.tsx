@@ -4,6 +4,7 @@ import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Octicons } from '@expo/vector-icons';
+import SecureStore from 'expo-secure-store';
 
 
 export default function Login({ navigation }: any) {
@@ -25,9 +26,19 @@ export default function Login({ navigation }: any) {
         setloginFail(true);
         setEmail("");
         setPassword("");
+        if (response.status === 401)
+        {
+          console.log("Invalid email or password")
+        }
         throw new Error(`Response status: ${response.status}`);
       }
+      // const data = await response.json();
+      // await SecureStore.setItemAsync("authToken", data.token);
+
+
       console.log("Logged In")
+      navigation.navigate("PostFeed");
+
     } catch (error) {
       console.error("Error logging in:", error);
     }

@@ -23,6 +23,10 @@
       "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
+    "permissions": [
+      "ACCESS_COARSE_LOCATION",
+      "ACCESS_FINE_LOCATION"
+    ],
     "plugins": [
       "expo-router",
       [
@@ -34,7 +38,20 @@
           "backgroundColor": "#ffffff"
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": {
+            "allowsBackgroundLocationUpdates": true,
+            "foregroundService": {
+              "notificationTitle": "YipYap",
+              "notificationBody": "YipYap is using your location in the background",
+              "notificationColor": "#FF0000"
+            }
+          }
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

@@ -1,16 +1,20 @@
 import { StyleSheet, TextInput, Pressable, Image } from 'react-native';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Octicons } from '@expo/vector-icons';
-import SecureStore from 'expo-secure-store';
+import * as SecureStore from 'expo-secure-store';
 
 
 export default function Login({ navigation }: any) {
   const [email, setEmail] = useState("")
   const [loginFail, setloginFail] = useState(false)
   const [password, setPassword] = useState("")
+
+  useEffect(() => {
+    retrieveCredentials();
+  }, []);
 
   const login = async () => {
     try {
@@ -32,15 +36,49 @@ export default function Login({ navigation }: any) {
         }
         throw new Error(`Response status: ${response.status}`);
       }
-      // const data = await response.json();
-      // await SecureStore.setItemAsync("authToken", data.token);
-
+      const data = await response.json();
+      await SecureStore.setItemAsync("authToken", data.authToken);
+      storeCredentials(email, password);
 
       console.log("Logged In")
       navigation.navigate("PostFeed");
 
     } catch (error) {
       console.error("Error logging in:", error);
+    }
+  }
+
+  const storeCredentials = async (email: string, password: string) =>
+  {
+    try
+    {
+      await SecureStore.setItemAsync("email", email);
+      await SecureStore.setItemAsync("password", password);
+    }
+    catch (error)
+    {
+      console.error("Error storing credentials:", error);
+    }
+  }
+
+  const retrieveCredentials = async () =>
+  {
+    try
+    {
+      const email = await SecureStore.getItemAsync("email");
+      const password = await SecureStore.getItemAsync("password");
+      if (email && password)
+      {
+        setEmail(email);
+        setPassword(password);
+        return true;
+      }
+      return false;
+    }
+    catch (error)
+    {
+      console.error("Error retrieving credentials:", error);
+      return false;
     }
   }
 

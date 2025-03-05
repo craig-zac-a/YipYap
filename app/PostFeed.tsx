@@ -1,4 +1,4 @@
-import { Image, StyleSheet, TextInput, Text, View, Platform, TouchableHighlight, Pressable, FlatList, RefreshControl } from 'react-native';
+import { Image, StyleSheet, TextInput, Text, View, Platform, Touchable, TouchableHighlight, Pressable, FlatList, RefreshControl, TouchableOpacity } from 'react-native';
 import React, { useState, useEffect, useCallback } from 'react';
 
 import ParallaxScrollView from '@/components/ParallaxScrollView';
@@ -27,10 +27,12 @@ export default function PostFeed() {
         timestamp: string;
     }
 
+    // Function that executes on page load
     useEffect(() => {
         fetchPosts();
     }, []);
 
+    // Function to device location
     const getLocation = async () => {
         try
         {
@@ -61,6 +63,7 @@ export default function PostFeed() {
         }
     };
 
+    // Function to fetch all posts in radius
     const fetchPosts = async () => {
         setRefreshing(true);
         const location = await getLocation();
@@ -82,13 +85,7 @@ export default function PostFeed() {
                 setRefreshing(false);
                 return;
             }
-            // const response = await fetch(`http://99.32.47.49:3000/posts/fetch?latitude=${location.latitude}&longitude=${location.longitude}&radius=5000`, {
-            //     method: 'GET',
-            //     headers: {
-            //       'Content-Type': 'application/json',
-            //       'Authorization': authToken,
-            //     }
-            // });
+
             const response = await axios.get(`http://99.32.47.49:3000/posts/fetch`, {
                 params: {
                     latitude: location.latitude,
@@ -101,19 +98,12 @@ export default function PostFeed() {
                 timeout: 5000,
             });
             
-            // if (!response.ok)
-            // {
-            //     throw new Error(`Response status: ${response.status}`);
-            // }
-
-            // const data = JSON.parse(await response.text());
             const data = response.data;
             console.log("Fetched Posts: ", data);
             setPosts(data);
         }
         catch (error)
         {
-            // console.error("Error fetching posts:", error);
             if (axios.isAxiosError(error)) {
                 console.error("Axios error fetching posts:", error.response?.status, error.response?.data);
             } else {
@@ -126,16 +116,48 @@ export default function PostFeed() {
         }
     };
 
+    // Refresh function
     const onRefresh = useCallback(async () => {
-        await fetchPosts();  // Ensures immediate execution
+        await fetchPosts();
     }, []);
 
+    // Render Post function
     const renderPost = ({ item }: { item: Post }) => (
-        <View style={styles.postContainer}>
-            <Text style={styles.postMessage}>{item.message}</Text>
-            <Text style={styles.postTimestamp}>Posted at: {item.timestamp}</Text>
-        </View>
+        <TouchableOpacity onPress={() => postClickHandler(item)}>
+            <View style={styles.postContainer}>
+                <Text style={styles.postMessage}>{item.message}</Text>
+                <Text style={styles.postTimestamp}>Posted {timeSincePost(item.timestamp)} ago</Text>
+            </View>
+        </TouchableOpacity>
     );
+
+    // Time since post was created
+    const timeSincePost = (timestamp: string) => {
+        const postTime = new Date(timestamp);
+        const currentTime = new Date();
+        const timeDifference = currentTime.getTime() - postTime.getTime();
+        const seconds = Math.floor(timeDifference / 1000);
+        const minutes = Math.floor(seconds / 60);
+        const hours = Math.floor(minutes / 60);
+        const days = Math.floor(hours / 24);
+        const weeks = Math.floor(days / 7);
+        const months = Math.floor(days / 30);
+        const years = Math.floor(days / 365);
+
+        if (years > 0) return `${years} year${years > 1 ? "s" : ""}`;
+        else if (months > 0) return `${months} month${months > 1 ? "s" : ""}`;
+        else if (weeks > 0) return `${weeks} week${weeks > 1 ? "s" : ""}`;
+        else if (days > 0) return `${days} day${days > 1 ? "s" : ""}`;
+        else if (hours > 0) return `${hours} hour${hours > 1 ? "s" : ""}`;
+        else if (minutes > 0) return `${minutes} minute${minutes > 1 ? "s" : ""}`;
+        else return `${seconds} second${seconds > 1 ? "s" : ""}`;
+    };
+
+
+    // Click handler for the post
+    const postClickHandler = (post: Post) => {
+        console.log(`Post Clicked: ${post.postid}`);
+    };
 
     return (
         <View style={styles.container}>

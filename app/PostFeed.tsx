@@ -260,11 +260,6 @@ export default function PostFeed() {
         await fetchPosts();
     }, []);
 
-    // Test function
-    const test = () => {
-        console.log("Test");
-    };
-
     // Render Post function
     const renderPost = ({ item }: { item: Post }) =>
     {
@@ -281,14 +276,14 @@ export default function PostFeed() {
                             <TouchableOpacity style={styles.reactionButton } onPress={() => reactToPost(item.postid, 1)}>
                                 <View style={styles.buttonContainer}>
                                     <Text style={styles.postInteractionCount}>{interaction.likes}</Text>
-                                    <AntDesign name={is_liked(item.postid)? "like1" : "like2"} size={24} color="black" />
+                                    <AntDesign name={is_liked(item.postid)? "like1" : "like2"} size={24} color={is_liked(item.postid)? "red" : "black"} />
                                 </View>
                             </TouchableOpacity>
                             
                             <TouchableOpacity style={styles.reactionButton} onPress={() => reactToPost(item.postid, -1)}>
                                 <View style={styles.buttonContainer}>
                                     <Text style={styles.postInteractionCount}>{interaction.dislikes}</Text>
-                                    <AntDesign name={is_disliked(item.postid)? "dislike1" : "dislike2"} size={24} color="black" />
+                                    <AntDesign name={is_disliked(item.postid)? "dislike1" : "dislike2"} size={24} color={is_disliked(item.postid)? "red" : "black"} />
                                 </View>
                             </TouchableOpacity>
                             

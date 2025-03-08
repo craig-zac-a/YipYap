@@ -120,7 +120,7 @@ export default function PostFeed() {
                 return;
             }
 
-            const response = await axios.get(`http://99.32.47.49:3000/posts/fetch`, {
+            const response = await axios.get(`http://99.32.47.49:3000/posts`, {
                 params: {
                     latitude: location.latitude,
                     longitude: location.longitude,
@@ -164,7 +164,7 @@ export default function PostFeed() {
         try
         {
             // Get the users reactions
-            const response = await axios.get(`http://99.32.47.49:3000/account/posts/get-reactions`, {
+            const response = await axios.get(`http://99.32.47.49:3000/users/me/posts/reactions`, {
                 headers: {
                     'Authorization': authToken,
                 },
@@ -194,12 +194,14 @@ export default function PostFeed() {
         try
         {
             // Result of this should be a json of the following: { likes: likeResults[0].count, dislikes: dislikeResults[0].count, comments: commentResults[0].count }
-            const response = await axios.get(`http://99.32.47.49:3000/posts/get-reactions/${postid}`, {
+            const response = await axios.get(`http://99.32.47.49:3000/posts/${postid}/reactions`, {
                 headers: {
                     'Authorization': authToken,
                 },
                 timeout: 5000,
             });
+
+            console.log(`Likes, Dislikes, and Comments on postid ${postid}: `, response.data);
             
             setInteractionCounts(prevCounts => ({
                 ...prevCounts,
@@ -235,7 +237,7 @@ export default function PostFeed() {
 
         try
         {
-            const response = await axios.post(`http://99.32.47.49:3000/posts/react/${postid}`, { reaction: react }, {
+            const response = await axios.post(`http://99.32.47.49:3000/posts/${postid}/reactions`, { reaction: react }, {
                 headers: {
                     'Authorization': authToken,
                 },

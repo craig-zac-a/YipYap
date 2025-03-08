@@ -8,6 +8,7 @@ import { Octicons } from '@expo/vector-icons';
 import { Checkbox } from 'expo-checkbox';
 import { Link, useNavigation } from 'expo-router';
 import { navigate } from 'expo-router/build/global-state/routing';
+import axios from 'axios';
 
 export default function HomeScreen() {
 	const navigation = useNavigation();
@@ -38,24 +39,19 @@ export default function HomeScreen() {
 
 	const createAccount = async () => {
 		try {
-			const response = await fetch('http://99.32.47.49:3000/account/register', {
-				method: 'POST',
-				headers: {
+			const response = await axios.post(`http://99.32.47.49:3000/users/register`, {email: email, password: password}, {
+                headers: {
 					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({email: email, password: password}),
-			});
+                },
+                timeout: 5000,
+            });
 
-			if (!response.ok) {
-				console.warn("Account created");
-				setUsedemail(true);
-				setEmail("");
-				return [];
-			}
 			navigation.goBack();
 			
 		} catch (error) {
 			console.error("Error creating account:", error);
+			setUsedemail(true);
+			setEmail("");
 			return [];
 		}
 	}

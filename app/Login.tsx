@@ -5,6 +5,7 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Octicons } from '@expo/vector-icons';
 import * as SecureStore from 'expo-secure-store';
+import axios from 'axios';
 
 
 export default function Login({ navigation }: any) {
@@ -18,32 +19,22 @@ export default function Login({ navigation }: any) {
 
   const login = async () => {
     try {
-      const response = await fetch('http://99.32.47.49:3000/account/login', {
-        method: 'POST',
+			const response = await axios.post(`http://99.32.47.49:3000/users/login`, {email: email, password: password}, {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email: email, password: password }),
+        timeout: 5000,
       });
-      console.log("Request sent")
-      if (!response.ok) {
-        setloginFail(true);
-        setEmail("");
-        setPassword("");
-        if (response.status === 401)
-        {
-          console.log("Invalid email or password")
-        }
-        throw new Error(`Response status: ${response.status}`);
-      }
-      const data = await response.json();
+      const data = response.data;
       await SecureStore.setItemAsync("authToken", data.authToken);
       storeCredentials(email, password);
 
-      console.log("Logged In")
       navigation.navigate("PostFeed");
 
     } catch (error) {
+      setloginFail(true);
+      setEmail("");
+      setPassword
       console.error("Error logging in:", error);
     }
   }

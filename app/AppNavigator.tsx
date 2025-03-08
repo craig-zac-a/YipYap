@@ -17,6 +17,7 @@ export default function AppNavigator() {
         component={CreateAccount} 
         options={{
           //headerLeft: () => null
+          headerTitle: 'Create an Account'
         }} 
       />
 
@@ -25,6 +26,7 @@ export default function AppNavigator() {
         component={Login} 
         options={{
           //headerLeft: () => null
+          headerTitle: 'Login'
         }} 
       />
 
@@ -32,7 +34,8 @@ export default function AppNavigator() {
         name="PostFeed" 
         component={PostFeed} 
         options={{
-          //headerLeft: () => null
+          headerLeft: () => null,
+          headerTitle: 'YipYap'
         }} 
       />
 

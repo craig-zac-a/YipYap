@@ -3,6 +3,7 @@ import { Image, StyleSheet, View, Button } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import * as SecureStore from 'expo-secure-store';
+import axios from 'axios';
 
 export default function HomeScreen({ navigation }: any) {
 
@@ -17,23 +18,19 @@ export default function HomeScreen({ navigation }: any) {
     // Verify the token is valid
     try
     {
-      const response = await fetch('http://99.32.47.49:3000/account/verifyToken', {
-        method: 'GET',
+      const response = await axios.get(`http://99.32.47.49:3000/users/verify`, {
         headers: {
-          Authorization: authToken,
+            'Authorization': authToken,
         },
+        timeout: 5000,
       });
-      if (!response.ok) {
-        console.log('Token verification failed');
-        await SecureStore.deleteItemAsync('authToken');
-        return;
-      }
 
       navigation.navigate('PostFeed');
     }
     catch (error)
     {
-      console.error('Error verifying token:', error);
+      console.log('Token verification failed');
+      await SecureStore.deleteItemAsync('authToken');
       return;
     }
   };

@@ -13,7 +13,7 @@ import * as Location from 'expo-location';
 import { Double } from 'react-native/Libraries/Types/CodegenTypes';
 import axios from 'axios';
 
-export default function PostFeed() {
+export default function PostFeed({ navigation }: any) {
     const [posts, setPosts] = useState<Post[]>([]);
     const [postIds, setPostIds] = useState<string[]>([]);
     const [reactions, setReactions] = useState([]);
@@ -325,6 +325,10 @@ export default function PostFeed() {
         else return `${seconds} second${seconds > 1 ? "s" : ""}`;
     };
 
+    // Function to navigate to the create post screen
+    const navigateToCreatePost = () => {
+        navigation.navigate('CreatePost');
+    };
 
     // Click handler for the post
     const postClickHandler = (post: Post) => {
@@ -345,6 +349,10 @@ export default function PostFeed() {
                     />
                 }
             />
+            {/* Need to make a button with a plus icon that sits in the bottom right of the screen that allows us to add a post */}
+            <TouchableOpacity style={styles.createPostButton} onPress={navigateToCreatePost}>
+                <AntDesign name="plus" size={24} color="black" />
+            </TouchableOpacity>
         </View>
     );
 
@@ -356,6 +364,19 @@ const styles = StyleSheet.create({
         backgroundColor: '#f5f5f5',
         paddingHorizontal: 2,
         paddingVertical: 8,
+    },
+    createPostButton: {
+        position: "absolute",
+        bottom: 16,
+        right: 16,
+        backgroundColor: "#ffffff",
+        padding: 12,
+        borderRadius: 50,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
     },
     postList: {
         flex: 1,

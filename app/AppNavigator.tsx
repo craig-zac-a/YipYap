@@ -4,6 +4,7 @@ import HomeScreen from './HomeScreen';
 import CreateAccount from './CreateAccount';
 import Login from './Login';
 import PostFeed from './PostFeed';
+import CreatePost from './CreatePost';
 
 const Stack = createStackNavigator();
 
@@ -36,6 +37,15 @@ export default function AppNavigator() {
         options={{
           headerLeft: () => null,
           headerTitle: 'YipYap'
+        }} 
+      />
+
+      <Stack.Screen 
+        name="CreatePost" 
+        component={CreatePost} 
+        options={{
+          headerLeft: () => null,
+          headerTitle: 'Create a Post'
         }} 
       />
 

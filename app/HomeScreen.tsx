@@ -38,7 +38,7 @@ export default function HomeScreen({ navigation }: any) {
   return (
     <ThemedView style={styles.container}>
       <Image
-        source={require('@/assets/images/partial-react-logo.png')}
+        source={require('@/assets/images/fulllogo.png')}
         style={styles.reactLogo}
       />
       
@@ -64,8 +64,8 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   reactLogo: {
-    height: 178,
-    width: 290,
+    height: 167,
+    width: 350,
     marginBottom: 40,
   },
   buttonContainer: {

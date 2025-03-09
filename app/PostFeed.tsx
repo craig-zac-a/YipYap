@@ -13,12 +13,14 @@ import * as Location from 'expo-location';
 import { Double } from 'react-native/Libraries/Types/CodegenTypes';
 import axios from 'axios';
 
-export default function PostFeed({ navigation }: any) {
+export default function PostFeed() {
     const [posts, setPosts] = useState<Post[]>([]);
     const [postIds, setPostIds] = useState<string[]>([]);
     const [reactions, setReactions] = useState([]);
     const [interactionCounts, setInteractionCounts] = useState<Record<string, InteractionCount>>({});
     const [refreshing, setRefreshing] = useState(false);
+
+    const navigation = useNavigation();
 
     let longitude: Double;
     let latitude: Double;
@@ -278,14 +280,14 @@ export default function PostFeed({ navigation }: any) {
                             <TouchableOpacity style={styles.reactionButton } onPress={() => reactToPost(item.postid, 1)}>
                                 <View style={styles.buttonContainer}>
                                     <Text style={styles.postInteractionCount}>{interaction.likes}</Text>
-                                    <AntDesign name={is_liked(item.postid)? "like1" : "like2"} size={24} color={is_liked(item.postid)? "red" : "black"} />
+                                    <AntDesign name={is_liked(item.postid)? "like1" : "like2"} size={24} color={is_liked(item.postid)? "#1D89CB" : "black"} />
                                 </View>
                             </TouchableOpacity>
                             
                             <TouchableOpacity style={styles.reactionButton} onPress={() => reactToPost(item.postid, -1)}>
                                 <View style={styles.buttonContainer}>
                                     <Text style={styles.postInteractionCount}>{interaction.dislikes}</Text>
-                                    <AntDesign name={is_disliked(item.postid)? "dislike1" : "dislike2"} size={24} color={is_disliked(item.postid)? "red" : "black"} />
+                                    <AntDesign name={is_disliked(item.postid)? "dislike1" : "dislike2"} size={24} color={is_disliked(item.postid)? "#D40404" : "black"} />
                                 </View>
                             </TouchableOpacity>
                             
@@ -349,6 +351,14 @@ export default function PostFeed({ navigation }: any) {
                     />
                 }
             />
+
+            <TouchableOpacity 
+                style={styles.button} 
+                onPress={() => navigation.navigate('AccountScreen')}
+                >
+                <Text style={styles.buttonText}>Go to Account</Text>
+            </TouchableOpacity>
+
             {/* Need to make a button with a plus icon that sits in the bottom right of the screen that allows us to add a post */}
             <TouchableOpacity style={styles.createPostButton} onPress={navigateToCreatePost}>
                 <AntDesign name="plus" size={24} color="black" />
@@ -367,7 +377,7 @@ const styles = StyleSheet.create({
     },
     createPostButton: {
         position: "absolute",
-        bottom: 16,
+        bottom: 90,
         right: 16,
         backgroundColor: "#ffffff",
         padding: 12,
@@ -483,7 +493,10 @@ const styles = StyleSheet.create({
 		borderWidth: 1,
 		borderRadius: 6,
 		alignItems: "center",
-		padding: 12
+		padding: 16,
+        alignSelf: "center",
+        marginBottom: 20,
+        backgroundColor: "black"
 	},
 	buttonText: {
 		textAlign: 'center',

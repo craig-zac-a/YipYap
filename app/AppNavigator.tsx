@@ -5,8 +5,19 @@ import CreateAccount from './CreateAccount';
 import Login from './Login';
 import PostFeed from './PostFeed';
 import CreatePost from './CreatePost';
+import AccountScreen from './AccountScreen'
+import { Image } from 'react-native';
 
 const Stack = createStackNavigator();
+
+function LogoTitle() {
+  return (
+    <Image
+      style={{ width: 75, height: 36 }}
+      source={require('@/assets/images/fulllogo.png')}
+    />
+  );
+}
 
 export default function AppNavigator() {
   return (
@@ -36,7 +47,16 @@ export default function AppNavigator() {
         component={PostFeed} 
         options={{
           headerLeft: () => null,
-          headerTitle: 'YipYap'
+          headerTitle: () => <LogoTitle/>
+        }} 
+      />
+
+      <Stack.Screen 
+        name="AccountScreen" 
+        component={AccountScreen} 
+        options={{
+          //headerLeft: () => null,
+          headerTitle: () => <LogoTitle/>
         }} 
       />
 
@@ -44,7 +64,7 @@ export default function AppNavigator() {
         name="CreatePost" 
         component={CreatePost} 
         options={{
-          headerLeft: () => null,
+          //headerLeft: () => null,
           headerTitle: 'Create a Post'
         }} 
       />

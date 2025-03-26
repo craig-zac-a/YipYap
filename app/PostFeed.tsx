@@ -291,7 +291,12 @@ export default function PostFeed() {
                                 </View>
                             </TouchableOpacity>
                             
-                            <TouchableOpacity style={styles.reactionButton} onPress={() => {navigation.setParams({parent: item}); navigation.navigate('CreatePost')}}>
+                            <TouchableOpacity style={styles.reactionButton} onPress={() => navigation.navigate('CreatePost', {
+                                                                                                                    parentid: item.postid,
+                                                                                                                    parentmessage: item.message,
+                                                                                                                    parenttimestamp: item.timestamp,
+                                                                                                                    parenttitle: item.title,
+                                                                                                                })}>
                                 <View style={styles.buttonContainer}>
                                     <Text style={styles.postInteractionCount}>{interaction.comments}</Text>
                                     <AntDesign name="message1" size={24} color="black" />
@@ -329,8 +334,7 @@ export default function PostFeed() {
 
     // Function to navigate to the create post screen
     const navigateToCreatePost = () => {
-        navigation.setParams({parent: <Post/>})
-        navigation.navigate('CreatePost');
+        navigation.navigate('CreatePost', {parentid: '',});
     };
 
     // Click handler for the post

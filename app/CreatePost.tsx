@@ -1,20 +1,18 @@
 import { StyleSheet, TextInput, Pressable, Image } from 'react-native';
 import React, { useState, useEffect } from 'react';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Octicons } from '@expo/vector-icons';
 import * as SecureStore from 'expo-secure-store';
 import * as Location from 'expo-location';
 import axios from 'axios';
-import { routeToScreen } from 'expo-router/build/useScreens';
-import { useLocalSearchParams } from 'expo-router';
-import Post from './PostFeed'
+import { useNavigation } from 'expo-router';
 
 
-export default function CreatePost({ navigation }: any) {
+export default function CreatePost() {
+    const navigation = useNavigation()
     const [message, setMessage] = useState("")
-    const {parent} = useLocalSearchParams<{parent: string}>()
+    const {parentid, parentmessage, parenttimestamp, parenttitle} = {parentid: '-1', parentmessage: '', parenttimestamp: '', parenttitle: ''}
 
     // Function to device location
     const getLocation = async () =>
@@ -72,20 +70,13 @@ export default function CreatePost({ navigation }: any) {
         }
         finally
         {
-            navigation.navigate("PostFeed");
+            navigation.goback();
         }
     }
 
     return (
         <Pressable style={{ width: "100%", height: "100%" }}>
-        <ParallaxScrollView
-            headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-            headerImage={ parent != <Post/> ?
-            <Image
-                source={require('@/assets/images/partial-react-logo.png')}
-                style={styles.reactLogo}
-            /> : parent
-            }>
+        <ThemedView style={[styles.stepContainer, { width: "100%", height: "100%" }]}>
             <ThemedView style={styles.titleContainer}>
                 <ThemedText>Create Post</ThemedText>
             </ThemedView>
@@ -106,7 +97,8 @@ export default function CreatePost({ navigation }: any) {
                     <ThemedText style={styles.buttonText}>Create Post</ThemedText>
                 </ThemedView>
             </Pressable>
-        </ParallaxScrollView>
+            <ThemedText>parentid: {parentid}</ThemedText>
+        </ThemedView>
         </Pressable>
     );
 }
@@ -125,11 +117,13 @@ const styles = StyleSheet.create({
   titleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginTop: 8,
     gap: 8,
   },
   stepContainer: {
     marginBottom: 8,
     alignItems: 'center',
+    gap: 16,
   },
   password: {
     fontSize: 8,

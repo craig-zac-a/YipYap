@@ -1,7 +1,5 @@
-import { StyleSheet, TextInput, Pressable, Image } from 'react-native';
+import { StyleSheet, TextInput, Pressable, View, Text } from 'react-native';
 import React, { useState, useEffect } from 'react';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
 import { Octicons } from '@expo/vector-icons';
 import * as SecureStore from 'expo-secure-store';
 import * as Location from 'expo-location';
@@ -75,42 +73,40 @@ export default function CreatePost({ route }: any) {
     }
 
     return (
-        <Pressable style={{ width: "100%", height: "100%" }}>
-        <ThemedView style={[styles.stepContainer, { width: "100%", height: "100%" }]}>
-            <ThemedView style={styles.titleContainer}>
-                <ThemedText>Create Post</ThemedText>
-            </ThemedView>
-            <ThemedView style={styles.formInputWrapper}>
-                <Octicons name="pencil" size={24} color="#FFFA" style={{marginLeft: 5, marginTop: 5}} />
+        <Pressable style={[styles.container, { width: "100%", height: "100%" }]}>
+            <View style={styles.titleContainer}>
+                <Text>Create Post</Text>
+            </View>
+            <View style={styles.formInputWrapper}>
+                <Octicons name="pencil" size={24} style={{marginLeft: 5, marginTop: 5}} />
                 <TextInput
                     style={styles.input}
-                    placeholderTextColor="#FFF7"
                     placeholder="Message"
                     multiline={true}
                     maxLength={125}
                     onChangeText={setMessage}
                     value={message}
                 />
-            </ThemedView>
+            </View>
             <Pressable style={styles.noRoom} onPress={sendPost}>
-                <ThemedView style={styles.button}>
-                    <ThemedText style={styles.buttonText}>Create Post</ThemedText>
-                </ThemedView>
+                <View style={styles.button}>
+                    <Text style={styles.buttonText}>Create Post</Text>
+                </View>
             </Pressable>
-            <ThemedText>parentid: {parentid}</ThemedText>
-        </ThemedView>
+            <Text>parentid: {parentid}</Text>
         </Pressable>
     );
 }
 
 const styles = StyleSheet.create({
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
+    container: {
+        flex: 1,
+        backgroundColor: '#f5f5f5',
+        paddingHorizontal: 2,
+        paddingVertical: 8,
+        gap: 8,
+        alignItems: 'center'
+    },
     noRoom: {
         padding: 0,
     },
@@ -132,7 +128,7 @@ const styles = StyleSheet.create({
   formInputWrapper: {
     width: '90%',
     height: 300,
-    backgroundColor: "#0005",
+    backgroundColor: "#ffffff",
     borderWidth: 1,
     borderRadius: 6,
     flexDirection: "row",
@@ -143,7 +139,6 @@ const styles = StyleSheet.create({
     width: "90%",
     height: "100%",
     marginLeft: 10,
-    color: "#FFFA",
     textAlignVertical: "top"
   },
   button: {
@@ -156,6 +151,5 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     textAlign: 'center',
-    color: 'white'
   },
 });

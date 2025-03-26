@@ -1,13 +1,8 @@
 import { Image, StyleSheet, TextInput, Text, View, Platform, TouchableWithoutFeedback, TouchableHighlight, Pressable, FlatList, RefreshControl, TouchableOpacity } from 'react-native';
 import React, { useState, useEffect, useCallback } from 'react';
 
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { Octicons, AntDesign } from '@expo/vector-icons';
-import { Checkbox } from 'expo-checkbox';
+import { AntDesign } from '@expo/vector-icons';
 import { Link, useNavigation } from 'expo-router';
-import { navigate } from 'expo-router/build/global-state/routing';
 import * as SecureStore from 'expo-secure-store';
 import * as Location from 'expo-location';
 import { Double } from 'react-native/Libraries/Types/CodegenTypes';

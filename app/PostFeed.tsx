@@ -334,7 +334,7 @@ export default function PostFeed() {
 
     // Function to navigate to the create post screen
     const navigateToCreatePost = () => {
-        navigation.navigate('CreatePost', {parentid: '',});
+        navigation.navigate('CreatePost', {parentid: '-1',});
     };
 
     // Click handler for the post

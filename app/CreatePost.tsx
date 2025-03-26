@@ -9,10 +9,10 @@ import axios from 'axios';
 import { useNavigation } from 'expo-router';
 
 
-export default function CreatePost() {
+export default function CreatePost({ route }: any) {
     const navigation = useNavigation()
     const [message, setMessage] = useState("")
-    const {parentid, parentmessage, parenttimestamp, parenttitle} = {parentid: '-1', parentmessage: '', parenttimestamp: '', parenttitle: ''}
+    const {parentid, parentmessage, parenttimestamp, parenttitle} = route.params
 
     // Function to device location
     const getLocation = async () =>
@@ -70,7 +70,7 @@ export default function CreatePost() {
         }
         finally
         {
-            navigation.goback();
+            navigation.goBack();
         }
     }
 

@@ -7,11 +7,14 @@ import { Octicons } from '@expo/vector-icons';
 import * as SecureStore from 'expo-secure-store';
 import * as Location from 'expo-location';
 import axios from 'axios';
+import { routeToScreen } from 'expo-router/build/useScreens';
+import { useLocalSearchParams } from 'expo-router';
+import Post from './PostFeed'
 
 
 export default function CreatePost({ navigation }: any) {
     const [message, setMessage] = useState("")
-
+    const {parent} = useLocalSearchParams<{parent: string}>()
 
     // Function to device location
     const getLocation = async () =>
@@ -47,7 +50,7 @@ export default function CreatePost({ navigation }: any) {
 
     const sendPost = async () => {
         const location = await getLocation();
-        if(!location) return;
+        if(!location || message.length == 0) return;
         try
         {
             const authToken = await SecureStore.getItemAsync("authToken");
@@ -77,20 +80,23 @@ export default function CreatePost({ navigation }: any) {
         <Pressable style={{ width: "100%", height: "100%" }}>
         <ParallaxScrollView
             headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-            headerImage={
+            headerImage={ parent != <Post/> ?
             <Image
                 source={require('@/assets/images/partial-react-logo.png')}
                 style={styles.reactLogo}
-            />
+            /> : parent
             }>
             <ThemedView style={styles.titleContainer}>
                 <ThemedText>Create Post</ThemedText>
             </ThemedView>
             <ThemedView style={styles.formInputWrapper}>
-                <Octicons name="pencil" size={24} color="#FFFA" />
+                <Octicons name="pencil" size={24} color="#FFFA" style={{marginLeft: 5, marginTop: 5}} />
                 <TextInput
                     style={styles.input}
+                    placeholderTextColor="#FFF7"
                     placeholder="Message"
+                    multiline={true}
+                    maxLength={125}
                     onChangeText={setMessage}
                     value={message}
                 />
@@ -131,19 +137,20 @@ const styles = StyleSheet.create({
   },
   formInputWrapper: {
     width: '90%',
-    height: 55,
+    height: 300,
     backgroundColor: "#0005",
     borderWidth: 1,
     borderRadius: 6,
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "baseline",
     marginBottom: 0
   },
   input: {
     width: "90%",
     height: "100%",
     marginLeft: 10,
-    color: "#FFFA"
+    color: "#FFFA",
+    textAlignVertical: "top"
   },
   button: {
     width: "90%",

@@ -45,6 +45,14 @@ export default function CreatePost({ route }: any) {
     };
 
     const sendPost = async () => {
+        if (parentid == "-1") {
+            sendCommentPost();
+        } else {
+            sendOiginalPost();
+        }
+    }
+
+    const sendOiginalPost = async () => {
         const location = await getLocation();
         if(!location || message.length == 0) return;
         try
@@ -72,11 +80,37 @@ export default function CreatePost({ route }: any) {
         }
     }
 
+    const sendCommentPost = async () => {
+        const location = await getLocation();
+        if (!location || message.length == 0) return;
+        try {
+            const authToken = await SecureStore.getItemAsync("authToken");
+
+            console.log("Sending comment at location:", location);
+            const response = await axios.post('https://99.32.47.49:3000/posts/' + parentid + '/comments', {latitude: location.latitude, longitude: location.longitude, message: message}, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': authToken,
+                },
+                timeout: 5000, 
+            });
+            console.log("Comment sent");
+        } catch (error) {
+            console.log("Hold my beer");
+            console.error("Error logging in:", error);
+        } finally {
+            navigation.goBack();
+        }
+    }
+
+    const header = parentid == "-1" ? <View/> :
+    <View>
+        <Text>parentid: {parentid}</Text>
+    </View>
+
     return (
         <Pressable style={[styles.container, { width: "100%", height: "100%" }]}>
-            <View style={styles.titleContainer}>
-                <Text>Create Post</Text>
-            </View>
+            {header}
             <View style={styles.formInputWrapper}>
                 <Octicons name="pencil" size={24} style={{marginLeft: 5, marginTop: 5}} />
                 <TextInput
@@ -93,7 +127,6 @@ export default function CreatePost({ route }: any) {
                     <Text style={styles.buttonText}>Create Post</Text>
                 </View>
             </Pressable>
-            <Text>parentid: {parentid}</Text>
         </Pressable>
     );
 }

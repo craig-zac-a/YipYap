@@ -238,7 +238,7 @@ export default function ViewPost({ route }: any) {
                                     </View>
                                 </TouchableOpacity>
 
-                                <TouchableOpacity style={styles.reactionButton}>
+                                <TouchableOpacity style={styles.reactionButton} onPress={() => navigation.navigate('CreatePost', {parentid: item.postid,})}>
                                     <View style={styles.buttonContainer}>
                                         <Text style={styles.postInteractionCount}>{interaction.comments}</Text>
                                         <AntDesign name="message1" size={24} color="black" />

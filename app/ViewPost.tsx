@@ -1,24 +1,33 @@
 import { Image, StyleSheet, TextInput, Text, View, Platform, TouchableWithoutFeedback, TouchableHighlight, Pressable, FlatList, RefreshControl, TouchableOpacity } from 'react-native';
 import React, { useState, useEffect, useCallback } from 'react';
 
-import { AntDesign } from '@expo/vector-icons';
+import ParallaxScrollView from '@/components/ParallaxScrollView';
+import { ThemedText } from '@/components/ThemedText';
+import { ThemedView } from '@/components/ThemedView';
+import { Octicons, AntDesign } from '@expo/vector-icons';
+import { Checkbox } from 'expo-checkbox';
 import { Link, useNavigation } from 'expo-router';
+import { navigate } from 'expo-router/build/global-state/routing';
 import * as SecureStore from 'expo-secure-store';
 import * as Location from 'expo-location';
 import { Double } from 'react-native/Libraries/Types/CodegenTypes';
 import axios from 'axios';
 
-export default function PostFeed() {
-    const [posts, setPosts] = useState<Post[]>([]);
-    const [postIds, setPostIds] = useState<string[]>([]);
+export default function ViewPost({ route }: any) {
+    const [post, setPost] = useState<Post>();
+    const [postId, setPostId] = useState<string>(route.params.postid);
     const [reactions, setReactions] = useState([]);
     const [interactionCounts, setInteractionCounts] = useState<Record<string, InteractionCount>>({});
+    const [comments, setComments] = useState<Comment[]>([]);
+    const [commentIds, setCommentIds] = useState<string[]>([]);
+    const [commentReactions, setCommentReactions] = useState([]);
+    const [commentInteractionCounts, setCommentInteractionCounts] = useState<Record<string, InteractionCount>>({});
     const [refreshing, setRefreshing] = useState(false);
 
-    const navigation = useNavigation();
+    // const postId = route.params.postid;
+    console.log(postId);
 
-    let longitude: Double;
-    let latitude: Double;
+    const navigation = useNavigation();
 
     interface Post {
         postid: string;
@@ -32,6 +41,18 @@ export default function PostFeed() {
         reaction: number;
     }
 
+    interface Comment {
+        commentid: string;
+        title: string;
+        message: string;
+        timestamp: string;
+    }
+
+    interface CommentReaction {
+        commentid: string;
+        reaction: number;
+    }
+
     interface InteractionCount {
         postid: string;
         likes: number;
@@ -42,61 +63,32 @@ export default function PostFeed() {
     // Function that executes on page load
     useEffect(() => {
         fetchUserReactions();
-        fetchPosts();
+        fetchPost();
+        fetchUserCommentReactions();
+        fetchComments();
     }, []);
 
     useEffect(() => {
         const fetchInteractions = async () => {
-            for (const postid of postIds) {
-                await getCountOfInteractions(postid);
+            await getCountOfInteractions(postId);
+            for (const commentid of commentIds) {
+                await getCountOfCommentInteractions(commentid);
             }
         };
 
-        if (postIds.length > 0) {
+        if (commentIds.length > 0) {
             fetchInteractions();
         }
-    }, [postIds]);
+    }, [commentIds]);
 
-    // Function to device location
-    const getLocation = async () => {
-        try {
-            let { status } = await Location.requestForegroundPermissionsAsync();
-
-            if (status !== "granted") {
-                console.log("Location permission denied");
-                return;
-            }
-
-            let location = await Location.getLastKnownPositionAsync({
-                maxAge: 60000,
-            });
-
-            if (!location || (Date.now() - location.timestamp) > 60000) {
-                location = await Location.getCurrentPositionAsync({
-                    accuracy: Location.Accuracy.Balanced,
-                });
-            }
-            return { latitude: location.coords.latitude, longitude: location.coords.longitude };
-        }
-        catch (error) {
-            console.error("Error requesting location permission:", error);
-            return null;
-        }
-    };
-
-    // Function to fetch all posts in radius
-    const fetchPosts = async () => {
+    // Function to fetch post
+    const fetchPost = async () => {
         setRefreshing(true);
-        const location = await getLocation();
-        if (!location) {
-            setRefreshing(false);
-            return;
-        }
 
         const source = axios.CancelToken.source();
 
         try {
-            console.log("Fetching Posts at: ", location);
+            console.log("Fetching Post");
             const authToken = await SecureStore.getItemAsync("authToken");
             if (!authToken) {
                 console.log("No auth token found");
@@ -104,26 +96,21 @@ export default function PostFeed() {
                 return;
             }
 
-            const response = await axios.get(`http://99.32.47.49:3000/posts`, {
-                params: {
-                    latitude: location.latitude,
-                    longitude: location.longitude,
-                    radius: 5000,
-                },
+            const response = await axios.get(`http://99.32.47.49:3000/posts/${postId}`, {
                 headers: {
                     'Authorization': authToken,
                 },
                 timeout: 5000,
             });
 
-            const data: Post[] = response.data;
-            console.log("Fetched Posts: ", data);
-            setPosts(data);
-            setPostIds(data.map(post => post.postid));
+            const data: Post = response.data;
+            console.log("Fetched Post: ", data);
+            setPost(data);
+            setPostId(data.postid);
         }
         catch (error) {
             if (axios.isAxiosError(error)) {
-                console.error("Axios error fetching posts:", error.response?.status, error.response?.data);
+                console.error("Axios error fetching post:", error.response?.status, error.response?.data);
             } else {
                 console.error("Unexpected error:", error);
             }
@@ -222,23 +209,20 @@ export default function PostFeed() {
         }
     };
 
-    // Refresh function
-    const onRefresh = useCallback(async () => {
-        await fetchUserReactions();
-        await fetchPosts();
-    }, []);
-
     // Render Post function
-    const renderPost = ({ item }: { item: Post }) => {
+    const PostBox = ({ item }: { item?: Post }) => {
+        if (!item) {
+            return null;
+        }
         const interaction = interactionCounts[item.postid] || { likes: 0, dislikes: 0, comments: 0 };
 
         return (
-            <TouchableOpacity style={styles.postWrapper} onPress={() => postClickHandler(item)}>
+            <TouchableOpacity style={styles.postWrapper}>
                 <View style={styles.postContainer}>
                     <Text style={styles.postMessage}>{item.message}</Text>
                     <TouchableWithoutFeedback>
                         <View style={styles.bottomBar}>
-                            <Text style={styles.postTimestamp}>Posted {timeSincePost(item.timestamp)} ago</Text>
+                            <Text style={styles.postTimestamp}>Posted {timeSinceCreated(item.timestamp)} ago</Text>
                             <View style={styles.reactionsContainer}>
                                 <TouchableOpacity style={styles.reactionButton} onPress={() => reactToPost(item.postid, 1)}>
                                     <View style={styles.buttonContainer}>
@@ -254,7 +238,7 @@ export default function PostFeed() {
                                     </View>
                                 </TouchableOpacity>
 
-                                <TouchableOpacity style={styles.reactionButton} onPress={() => navigation.navigate('CreatePost', {parentid: item.postid,})}>
+                                <TouchableOpacity style={styles.reactionButton}>
                                     <View style={styles.buttonContainer}>
                                         <Text style={styles.postInteractionCount}>{interaction.comments}</Text>
                                         <AntDesign name="message1" size={24} color="black" />
@@ -268,8 +252,180 @@ export default function PostFeed() {
         )
     };
 
+    // Function to fetch all comments of post
+    const fetchComments = async () => {
+        setRefreshing(true);
+        const source = axios.CancelToken.source();
+
+        try {
+            console.log("Fetching Comments");
+            const authToken = await SecureStore.getItemAsync("authToken");
+            if (!authToken) {
+                console.log("No auth token found");
+                setRefreshing(false);
+                return;
+            }
+
+            const response = await axios.get(`http://99.32.47.49:3000/posts/${postId}/comments`, {
+                headers: {
+                    'Authorization': authToken,
+                },
+                timeout: 5000,
+            });
+
+            const data: Comment[] = response.data;
+            if (!data) {
+                console.log("No Comments");
+                return;
+            }
+            console.log("Fetched Comments: ", data);
+            setComments(data);
+            setCommentIds(data.map(comment => comment.commentid));
+        }
+        catch (error) {
+            if (axios.isAxiosError(error)) {
+                console.error("Axios error fetching comments:", error.response?.status, error.response?.data);
+            } else {
+                console.error("Unexpected error:", error);
+            }
+        }
+        finally {
+            setRefreshing(false);
+        }
+    };
+
+    // Function to fetch user's reactions
+    const fetchUserCommentReactions = async () => {
+        const authToken = await SecureStore.getItemAsync("authToken");
+        if (!authToken) {
+            console.log("No auth token found");
+            return;
+        }
+
+        try {
+            // Get the users reactions
+            const response = await axios.get(`http://99.32.47.49:3000/users/me/comments/reactions`, {
+                headers: {
+                    'Authorization': authToken,
+                },
+                timeout: 5000,
+            });
+
+            const data = response.data;
+            console.log("Fetched User Comment Reactions: ", data);
+            setCommentReactions(data);
+        }
+        catch (error) {
+            console.error("Error fetching user comment reactions:", error);
+        }
+    };
+
+    // Get the number of likes, dislikes
+    const getCountOfCommentInteractions = async (commentid: string) => {
+        const authToken = await SecureStore.getItemAsync("authToken");
+        if (!authToken) {
+            console.log("No auth token found");
+            return;
+        }
+
+        try {
+            // Result of this should be a json of the following: { likes: likeResults[0].count, dislikes: dislikeResults[0].count, comments: commentResults[0].count }
+            const response = await axios.get(`http://99.32.47.49:3000/posts/${postId}/comments/${commentid}/reactions`, {
+                headers: {
+                    'Authorization': authToken,
+                },
+                timeout: 5000,
+            });
+
+            console.log(`Likes, Dislikes on commentid ${commentid}: `, response.data);
+
+            setCommentInteractionCounts(prevCounts => ({
+                ...prevCounts,
+                [commentid]: response.data
+            }));
+        }
+        catch (error) {
+            console.error("Error getting count of interactions:", error);
+        }
+    };
+
+    const comment_is_liked = (commentid: string) => {
+        return commentReactions.some((reaction: CommentReaction) => reaction.commentid === commentid && reaction.reaction === 1);
+    };
+
+    const comment_is_disliked = (commentid: string) => {
+        return commentReactions.some((reaction: CommentReaction) => reaction.commentid === commentid && reaction.reaction === -1);
+    };
+
+    const reactToComment = async (commentid: string, react: number) => {
+        if (commentReactions.some((reaction: CommentReaction) => reaction.commentid === commentid && reaction.reaction === react)) react = 0;
+
+        const authToken = await SecureStore.getItemAsync("authToken");
+        if (!authToken) {
+            console.log("No auth token found");
+            return;
+        }
+
+        try {
+            const response = await axios.post(`http://99.32.47.49:3000/posts/${postId}/comments/${commentid}/reactions`, { reaction: react }, {
+                headers: {
+                    'Authorization': authToken,
+                },
+                timeout: 5000,
+            });
+        }
+        catch (error) {
+            console.error("Error liking post:", error);
+        }
+        finally {
+            fetchUserCommentReactions();
+            getCountOfCommentInteractions(commentid);
+        }
+    };
+
+    // Refresh function
+    const onRefresh = useCallback(async () => {
+        await fetchUserReactions();
+        await fetchPost();
+        await fetchUserCommentReactions();
+        await fetchComments();
+    }, []);
+
+    // Render Post function
+    const renderComment = ({ item }: { item: Comment }) => {
+        const interaction = commentInteractionCounts[item.commentid] || { likes: 0, dislikes: 0, comments: 0 };
+
+        return (
+            <TouchableOpacity style={styles.postWrapper}>
+                <View style={styles.postContainer}>
+                    <Text style={styles.postMessage}>{item.message}</Text>
+                    <TouchableWithoutFeedback>
+                        <View style={styles.bottomBar}>
+                            <Text style={styles.postTimestamp}>Commented {timeSinceCreated(item.timestamp)} ago</Text>
+                            <View style={styles.reactionsContainer}>
+                                <TouchableOpacity style={styles.reactionButton} onPress={() => reactToComment(item.commentid, 1)}>
+                                    <View style={styles.buttonContainer}>
+                                        <Text style={styles.postInteractionCount}>{interaction.likes}</Text>
+                                        <AntDesign name={comment_is_liked(item.commentid) ? "like1" : "like2"} size={24} color={comment_is_liked(item.commentid) ? "#1D89CB" : "black"} />
+                                    </View>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity style={styles.reactionButton} onPress={() => reactToComment(item.commentid, -1)}>
+                                    <View style={styles.buttonContainer}>
+                                        <Text style={styles.postInteractionCount}>{interaction.dislikes}</Text>
+                                        <AntDesign name={comment_is_disliked(item.commentid) ? "dislike1" : "dislike2"} size={24} color={comment_is_disliked(item.commentid) ? "#D40404" : "black"} />
+                                    </View>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </TouchableWithoutFeedback>
+                </View>
+            </TouchableOpacity>
+        )
+    };
+
     // Time since post was created
-    const timeSincePost = (timestamp: string) => {
+    const timeSinceCreated = (timestamp: string) => {
         const postTime = new Date(timestamp);
         const currentTime = new Date();
         const timeDifference = currentTime.getTime() - postTime.getTime();
@@ -290,23 +446,13 @@ export default function PostFeed() {
         else return `${seconds} second${seconds > 1 ? "s" : ""}`;
     };
 
-    // Function to navigate to the create post screen
-    const navigateToCreatePost = () => {
-        navigation.navigate('CreatePost', {parentid: '-1',});
-    };
-
-    // Click handler for the post
-    const postClickHandler = (post: Post) => {
-        // console.log(`Post Clicked: ${post.postid}`);
-        navigation.navigate('ViewPost', { postid: post.postid });
-    };
-
     return (
         <View style={styles.container}>
-            <FlatList<Post>
-                data={posts}
-                keyExtractor={(item) => item.postid.toString()}
-                renderItem={renderPost}
+            <PostBox item={post} />
+            <FlatList<Comment>
+                data={comments}
+                keyExtractor={(item) => item.commentid.toString()}
+                renderItem={renderComment}
                 style={styles.postList}
                 refreshControl={
                     <RefreshControl
@@ -315,18 +461,6 @@ export default function PostFeed() {
                     />
                 }
             />
-
-            <TouchableOpacity
-                style={styles.button}
-                onPress={() => navigation.navigate('AccountScreen')}
-            >
-                <Text style={styles.buttonText}>Go to Account</Text>
-            </TouchableOpacity>
-
-            {/* Need to make a button with a plus icon that sits in the bottom right of the screen that allows us to add a post */}
-            <TouchableOpacity style={styles.createPostButton} onPress={navigateToCreatePost}>
-                <AntDesign name="plus" size={24} color="black" />
-            </TouchableOpacity>
         </View>
     );
 
@@ -343,7 +477,7 @@ const styles = StyleSheet.create({
         position: "absolute",
         bottom: 90,
         right: 16,
-        backgroundColor: "#ffea00",
+        backgroundColor: "#ffffff",
         padding: 12,
         borderRadius: 50,
         shadowColor: "#000",

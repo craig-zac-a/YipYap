@@ -6,6 +6,7 @@ import Login from './Login';
 import PostFeed from './PostFeed';
 import CreatePost from './CreatePost';
 import AccountScreen from './AccountScreen'
+import ViewPost from './ViewPost';
 import { Image } from 'react-native';
 
 const Stack = createStackNavigator();
@@ -24,49 +25,58 @@ export default function AppNavigator() {
     <Stack.Navigator initialRouteName="Home">
       <Stack.Screen name="Home" component={HomeScreen} />
 
-      <Stack.Screen 
-        name="CreateAccount" 
-        component={CreateAccount} 
+      <Stack.Screen
+        name="CreateAccount"
+        component={CreateAccount}
         options={{
           //headerLeft: () => null
           headerTitle: 'Create an Account'
-        }} 
+        }}
       />
 
-      <Stack.Screen 
-        name="Login" 
-        component={Login} 
+      <Stack.Screen
+        name="Login"
+        component={Login}
         options={{
           //headerLeft: () => null
           headerTitle: 'Login'
-        }} 
+        }}
       />
 
-      <Stack.Screen 
-        name="PostFeed" 
-        component={PostFeed} 
+      <Stack.Screen
+        name="PostFeed"
+        component={PostFeed}
         options={{
           headerLeft: () => null,
-          headerTitle: () => <LogoTitle/>
-        }} 
+          headerTitle: () => <LogoTitle />
+        }}
       />
 
-      <Stack.Screen 
-        name="AccountScreen" 
-        component={AccountScreen} 
+      <Stack.Screen
+        name="AccountScreen"
+        component={AccountScreen}
         options={{
           //headerLeft: () => null,
-          headerTitle: () => <LogoTitle/>
-        }} 
+          headerTitle: () => <LogoTitle />
+        }}
       />
 
-      <Stack.Screen 
-        name="CreatePost" 
-        component={CreatePost} 
+      <Stack.Screen
+        name="CreatePost"
+        component={CreatePost}
         options={{
           //headerLeft: () => null,
           headerTitle: 'Create a Post'
-        }} 
+        }}
+      />
+
+      <Stack.Screen
+        name="ViewPost"
+        component={ViewPost}
+        options={{
+          //headerLeft: () => null,
+          headerTitle: 'View Post'
+        }}
       />
 
     </Stack.Navigator>

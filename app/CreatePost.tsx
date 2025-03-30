@@ -285,6 +285,7 @@ const styles = StyleSheet.create({
         color: "#888",
         textAlign: "left",
         flex: 1,
+        marginBottom: 6,
     },
     reactionsContainer: {
         flexDirection: "row",

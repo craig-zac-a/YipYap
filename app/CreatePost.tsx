@@ -46,13 +46,13 @@ export default function CreatePost({ route }: any) {
 
     const sendPost = async () => {
         if (parentid == "-1") {
-            sendCommentPost();
+            sendOriginalPost();
         } else {
-            sendOiginalPost();
+            sendCommentPost();
         }
     }
 
-    const sendOiginalPost = async () => {
+    const sendOriginalPost = async () => {
         const location = await getLocation();
         if(!location || message.length == 0) return;
         try
@@ -87,7 +87,7 @@ export default function CreatePost({ route }: any) {
             const authToken = await SecureStore.getItemAsync("authToken");
 
             console.log("Sending comment at location:", location);
-            const response = await axios.post('https://99.32.47.49:3000/posts/' + parentid + '/comments', {latitude: location.latitude, longitude: location.longitude, message: message}, {
+            const response = await axios.post('https://99.32.47.49:3000/posts/' + parentid + '/comments', {message: message}, {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': authToken,

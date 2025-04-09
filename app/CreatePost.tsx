@@ -5,12 +5,15 @@ import * as SecureStore from 'expo-secure-store';
 import * as Location from 'expo-location';
 import axios from 'axios';
 import { useNavigation } from 'expo-router';
+import { FlatList } from 'react-native-gesture-handler';
 
 
 export default function CreatePost({ route }: any) {
     const navigation = useNavigation()
     const [post, setPost] = useState<Post>();
     const [message, setMessage] = useState("")
+    const [flair, setFlair] = useState("")
+    let flairs: string[] = []
     const {parentid, parentmessage, parenttimestamp, parenttitle} = route.params
     
     interface Post {
@@ -190,11 +193,26 @@ export default function CreatePost({ route }: any) {
     const parentpost = parentid == '-1' ? <View/> :
     <PostBox item={post} />
 
+    const flairelement = parentid != '-1' ? <View/> :
+    <View style={styles.flairsInputWrapper}>
+        <Octicons name='feed-tag' size={24} style={{marginLeft: 5, marginTop: 8}} />
+        <TextInput
+            style={styles.input}
+            placeholder='Flair'
+            maxLength={15}
+            onChangeText={setFlair}
+            value={flair}
+            onSubmitEditing={() => {flairs.push(flair); setFlair("")}}
+        />
+        <FlatList data={flairs} renderItem={({item}) => <Text style={styles.postMessage}>{item}</Text>} />
+    </View>
+
     return (
         <View style={styles.container}>
             {parentpost}
+            {flairelement}
             <View style={styles.formInputWrapper}>
-                <Octicons name="pencil" size={24} style={{marginLeft: 5, marginTop: 5}} />
+                <Octicons name="pencil" size={24} style={{marginLeft: 5, marginTop: 8}} />
                 <TextInput
                     style={styles.input}
                     placeholder="Message"
@@ -234,8 +252,19 @@ const styles = StyleSheet.create({
         marginBottom: 0,
         marginHorizontal: 16,
     },
+    flairsInputWrapper: {
+        height: 40,
+        backgroundColor: "#ffffff",
+        borderWidth: 1,
+        borderRadius: 6,
+        flexDirection: "row",
+        alignItems: "baseline",
+        marginBottom: 0,
+        marginHorizontal: 16,
+    },
     input: {
         height: "100%",
+        width: "100%",
         marginLeft: 10,
         textAlignVertical: "top"
     },

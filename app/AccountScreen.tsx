@@ -73,6 +73,31 @@ export default function AccountScreen({ navigation }: any)
         }
     };
 
+    const updateUserPassword = async () => {
+        const authToken = await SecureStore.getItemAsync('authToken');
+
+        try
+        {
+            const response = await axios.put(`http://99.32.47.49:3000/users/me/password`, {password: password}, {
+                headers: {
+                    'Authorization': authToken,
+                    'Content-Type': 'application/json',
+                },
+                timeout: 5000,
+            });
+        }
+        catch (error)
+        {
+            console.error("Error updating password:", error);
+        }
+        finally
+        {
+            setChangePasswordModalVisible(false);
+            setPassword('');
+            getAccountInfo();
+        }
+    };
+
 
 
     const navBar = () => {
@@ -108,11 +133,37 @@ export default function AccountScreen({ navigation }: any)
                             </View>
                         </View>
                     </Modal>
+
+                    <Modal
+                        animationType='slide'
+                        transparent={true}
+                        visible={changePasswordModalVisible}
+                        onRequestClose={() => setChangePasswordModalVisible(!changePasswordModalVisible)}
+                    >
+                        <View style={styles.centerView}>
+                            <View style={styles.modal}>
+                                <TextInput
+                                    placeholder='New Password'
+                                    value={password}
+                                    onChangeText={(password) => {setPassword(password)}}
+                                    autoCapitalize='none'
+                                    style={styles.modalInput}
+                                />
+                                <Button title='Submit' onPress={() => updateUserPassword()} />
+                            </View>
+                        </View>
+                    </Modal>
+
                 </View>
                 <View style={styles.rowContainer}>
                     <ThemedText>{accountInfo.email}</ThemedText>
                     <Button title='Change Email' onPress={() => setChangeEmailModalVisible(!changeEmailModalVisible)} />
                 </View>
+
+                <View style={styles.rowContainer}>
+                    <Button title='Change Password' onPress={() => setChangePasswordModalVisible(!changePasswordModalVisible)} />
+                </View>
+                
             </View>
         );
     };

@@ -70,7 +70,7 @@ export default function CreatePost({ route }: any) {
             const authToken = await SecureStore.getItemAsync("authToken");
 
             console.log("Sending post at location:", location);
-            const response = await axios.post(`http://99.32.47.49:3000/posts`, {latitude: location.latitude, longitude: location.longitude, message: message}, {
+            const response = await axios.post(`http://99.32.47.49:3000/posts`, {latitude: location.latitude, longitude: location.longitude, message: message, flairs: flairs}, {
             headers: {
             'Content-Type': 'application/json',
             'Authorization': authToken,

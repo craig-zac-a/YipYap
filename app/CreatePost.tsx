@@ -1,11 +1,10 @@
-import { StyleSheet, TextInput, Pressable, View, Text, TouchableOpacity, TouchableWithoutFeedback } from 'react-native';
+import { StyleSheet, TextInput, Pressable, View, Text, TouchableOpacity, TouchableWithoutFeedback, FlatList } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { Octicons, AntDesign } from '@expo/vector-icons';
 import * as SecureStore from 'expo-secure-store';
 import * as Location from 'expo-location';
 import axios from 'axios';
 import { useNavigation } from 'expo-router';
-import { FlatList } from 'react-native-gesture-handler';
 
 
 export default function CreatePost({ route }: any) {
@@ -13,7 +12,7 @@ export default function CreatePost({ route }: any) {
     const [post, setPost] = useState<Post>();
     const [message, setMessage] = useState("")
     const [flair, setFlair] = useState("")
-    let flairs: string[] = []
+    const [flairs, setFlairs] = useState<string[]>([])
     const {parentid, parentmessage, parenttimestamp, parenttitle} = route.params
     
     interface Post {
@@ -194,17 +193,31 @@ export default function CreatePost({ route }: any) {
     <PostBox item={post} />
 
     const flairelement = parentid != '-1' ? <View/> :
-    <View style={styles.flairsInputWrapper}>
-        <Octicons name='feed-tag' size={24} style={{marginLeft: 5, marginTop: 8}} />
-        <TextInput
-            style={styles.input}
-            placeholder='Flair'
-            maxLength={15}
-            onChangeText={setFlair}
-            value={flair}
-            onSubmitEditing={() => {flairs.push(flair); setFlair("")}}
-        />
-        <FlatList data={flairs} renderItem={({item}) => <Text style={styles.postMessage}>{item}</Text>} />
+    <View style={styles.flairsContainer}>
+        <View style={styles.flairsFormInputWrapper}>
+            <Octicons name='feed-tag' size={24} style={{marginLeft: 5, marginTop: 8}} />
+            <TextInput
+                style={styles.input}
+                placeholder='Flair'
+                maxLength={15}
+                onChangeText={setFlair}
+                value={flair}
+                onSubmitEditing={() => {setFlairs([...flairs, flair]); setFlair('')}}
+            />
+        </View>
+        <View style={[styles.flairsWrapper, {borderWidth: flairs.length == 0 ? 0 : 1}]}>
+            <FlatList
+                style={styles.flairsValues}
+                data={flairs}
+                renderItem={({item}) =>  
+                    (<View style={styles.flairsItem}>
+                        <Text style={{marginRight: 4}}>{item}</Text>
+                        <TouchableWithoutFeedback
+                            onPress={() => setFlairs(flairs.filter(f => f !== item))}><Octicons name='x' size={24} /></TouchableWithoutFeedback>
+                    </View>)
+                }
+            />
+        </View>
     </View>
 
     return (
@@ -252,7 +265,26 @@ const styles = StyleSheet.create({
         marginBottom: 0,
         marginHorizontal: 16,
     },
-    flairsInputWrapper: {
+    flairsContainer: {
+        gap: 8
+    },
+    flairsWrapper: {
+        backgroundColor: "#ffffff",
+        borderWidth: 1,
+        borderRadius: 6,
+        marginBottom: 0,
+        marginHorizontal: 16,
+    },
+    flairsValues: {
+        marginBottom: 0,
+        marginHorizontal: 16,
+    },
+    flairsItem: {
+        flexDirection: "row",
+        alignContent: "flex-end",
+        alignItems: "center",
+    },
+    flairsFormInputWrapper: {
         height: 40,
         backgroundColor: "#ffffff",
         borderWidth: 1,

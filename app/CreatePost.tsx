@@ -1,19 +1,22 @@
-import { StyleSheet, TextInput, Pressable, View, Text, TouchableOpacity, TouchableWithoutFeedback, FlatList } from 'react-native';
+import { StyleSheet, TextInput, Pressable, View, Text, TouchableOpacity, TouchableWithoutFeedback, FlatList, Image, Alert } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { Octicons, AntDesign } from '@expo/vector-icons';
 import * as SecureStore from 'expo-secure-store';
 import * as Location from 'expo-location';
 import axios from 'axios';
 import { useNavigation } from 'expo-router';
+import * as ImagePicker from "expo-image-picker"
 
 
 export default function CreatePost({ route }: any) {
     const navigation = useNavigation()
-    const [post, setPost] = useState<Post>();
+    const [post, setPost] = useState<Post>()
     const [message, setMessage] = useState("")
     const [flair, setFlair] = useState("")
     const [flairs, setFlairs] = useState<string[]>([])
-    const {parentid, parentmessage, parenttimestamp, parenttitle} = route.params
+    const [img, setImg] = useState<string|null>(null)
+    const [error, setError] = useState(null)
+    const {parentid} = route.params
     
     interface Post {
         postid: string;
@@ -64,7 +67,7 @@ export default function CreatePost({ route }: any) {
 
     const sendOriginalPost = async () => {
         const location = await getLocation();
-        if(!location || message.length == 0) return;
+        if(!location || (message.length == 0 && img == null)) return;
         try
         {
             const authToken = await SecureStore.getItemAsync("authToken");
@@ -91,12 +94,10 @@ export default function CreatePost({ route }: any) {
     }
 
     const sendCommentPost = async () => {
-        const location = await getLocation();
-        if (!location || message.length == 0) return;
+        if (message.length == 0 && img == null) return;
         try {
             const authToken = await SecureStore.getItemAsync("authToken");
 
-            console.log("Sending comment at location:", location);
             const response = await axios.post(`http://99.32.47.49:3000/posts/${parentid}/comments`, {message: message}, {
                 headers: {
                     'Content-Type': 'application/json',
@@ -165,11 +166,27 @@ export default function CreatePost({ route }: any) {
         else return `${seconds} second${seconds > 1 ? "s" : ""}`;
     };
 
+    const pickImg = async () => {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync()
+
+        if (status !== "granted") {
+            Alert.alert("Permission Denied", 'Sorry, we need camera roll permission to upload images.')
+        } else {
+            const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ["images"],
+            })
+
+            if (!result.canceled) {
+                setImg(result.assets[0].uri)
+                setError(null)
+            }
+        }
+    }
+
     const PostBox = ({ item }: { item?: Post }) => {
         if (!item) {
             return null;
         }
-        // const interaction = interactionCounts[item.postid] || { likes: 0, dislikes: 0, comments: 0 };
 
         return (
             <TouchableOpacity style={styles.postWrapper}>
@@ -202,7 +219,7 @@ export default function CreatePost({ route }: any) {
                 maxLength={15}
                 onChangeText={setFlair}
                 value={flair}
-                onSubmitEditing={() => {setFlairs([...flairs, flair]); setFlair('')}}
+                onSubmitEditing={() => {if (!flairs.includes(flair)) {setFlairs([...flairs, flair])} setFlair('')}}
             />
         </View>
         <View style={[styles.flairsWrapper, {borderWidth: flairs.length == 0 ? 0 : 1}]}>
@@ -213,17 +230,33 @@ export default function CreatePost({ route }: any) {
                     (<View style={styles.flairsItem}>
                         <Text style={{marginRight: 4}}>{item}</Text>
                         <TouchableWithoutFeedback
-                            onPress={() => setFlairs(flairs.filter(f => f !== item))}><Octicons name='x' size={24} /></TouchableWithoutFeedback>
+                            onPress={() => setFlairs(flairs.filter(f => f !== item))}><Octicons name='x' size={24} />
+                        </TouchableWithoutFeedback>
                     </View>)
                 }
             />
         </View>
     </View>
 
+    const imgelement = <TouchableWithoutFeedback style={styles.imageInputWrapper} onPress={pickImg}>
+    {img ? (
+        <View style={styles.imageItem}>
+            <Image source={{ uri: img }} style={styles.image} />
+            <TouchableWithoutFeedback
+                onPress={() => setImg(null)}><Octicons name='x' size={24} style={styles.imageRemove} />
+            </TouchableWithoutFeedback>
+            {/* <Text>{img}</Text> */}
+        </View>
+    ) : (
+        <Text style={{alignSelf: 'center'}}>Touch to add picture</Text>
+    )}
+    </TouchableWithoutFeedback>
+
     return (
         <View style={styles.container}>
             {parentpost}
             {flairelement}
+            {imgelement}
             <View style={styles.formInputWrapper}>
                 <Octicons name="pencil" size={24} style={{marginLeft: 5, marginTop: 8}} />
                 <TextInput
@@ -367,4 +400,31 @@ const styles = StyleSheet.create({
         flexDirection: "column",
         alignItems: "center",
     },
+    imageInputWrapper: {
+        height: 300,
+        backgroundColor: "#ffffff",
+        borderWidth: 1,
+        borderRadius: 6,
+        flexDirection: "row",
+        // alignItems: "baseline",
+        marginHorizontal: 16,
+        // alignContent: 'center',
+        gap: 8
+    },
+    imageItem: {
+        flexDirection: "row",
+        alignContent: "center",
+        alignItems: "center",
+        alignSelf: "center"
+    },
+    image: {
+        width: 200,
+        height: 200,
+        borderRadius: 8,
+        alignSelf: 'center'
+    },
+    imageRemove: {
+        flexDirection: "column",
+        alignSelf: 'flex-start'
+    }
 });

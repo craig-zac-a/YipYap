@@ -1,5 +1,5 @@
 import React, { useState, useEffect, Children } from 'react';
-import { Image, StyleSheet, View, Button, Switch, Modal } from 'react-native';
+import { Image, StyleSheet, View, Button, Switch, Modal, TouchableOpacity, Text } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import * as SecureStore from 'expo-secure-store';
@@ -163,6 +163,12 @@ export default function AccountScreen({ navigation }: any)
                 <View style={styles.rowContainer}>
                     <Button title='Change Password' onPress={() => setChangePasswordModalVisible(!changePasswordModalVisible)} />
                 </View>
+                <TouchableOpacity
+                    style={styles.button}
+                    onPress={() => navigation.navigate('SavedPosts')}
+                >
+                    <Text style={styles.buttonText}>View Saved Posts</Text>
+                </TouchableOpacity>
                 
             </View>
         );
@@ -199,6 +205,21 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         padding: 20,
         height: '100%',
+    },
+    button: {
+        width: "90%",
+        height: 55,
+        borderWidth: 1,
+        borderRadius: 6,
+        alignItems: "center",
+        padding: 16,
+        alignSelf: "center",
+        marginBottom: 20,
+        backgroundColor: "black"
+    },
+    buttonText: {
+        textAlign: 'center',
+        color: 'white'
     },
     reactLogo: {
         height: 178,

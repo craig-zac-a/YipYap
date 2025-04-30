@@ -7,6 +7,7 @@ import PostFeed from './PostFeed';
 import CreatePost from './CreatePost';
 import AccountScreen from './AccountScreen'
 import ViewPost from './ViewPost';
+import SavedPosts from './SavedPosts';
 import { Image } from 'react-native';
 
 const Stack = createStackNavigator();
@@ -76,6 +77,15 @@ export default function AppNavigator() {
         options={{
           //headerLeft: () => null,
           headerTitle: 'View Post'
+        }}
+      />
+      
+      <Stack.Screen
+        name="SavedPosts"
+        component={SavedPosts}
+        options={{
+          //headerLeft: () => null,
+          headerTitle: 'Saved Posts'
         }}
       />
 

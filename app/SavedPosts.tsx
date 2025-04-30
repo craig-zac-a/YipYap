@@ -9,7 +9,7 @@ import * as Location from 'expo-location';
 import { Double } from 'react-native/Libraries/Types/CodegenTypes';
 import axios from 'axios';
 
-export default function PostFeed() {
+export default function SavedPosts() {
     const [posts, setPosts] = useState<Post[]>([]);
     const [postIds, setPostIds] = useState<string[]>([]);
     const [reactions, setReactions] = useState([]);
@@ -18,8 +18,6 @@ export default function PostFeed() {
 
     const navigation = useNavigation();
 
-    let longitude: Double;
-    let latitude: Double;
 
     interface Post {
         postid: string;
@@ -59,46 +57,14 @@ export default function PostFeed() {
         }
     }, [postIds]);
 
-    // Function to device location
-    const getLocation = async () => {
-        try {
-            let { status } = await Location.requestForegroundPermissionsAsync();
-
-            if (status !== "granted") {
-                console.log("Location permission denied");
-                return;
-            }
-
-            let location = await Location.getLastKnownPositionAsync({
-                maxAge: 60000,
-            });
-
-            if (!location || (Date.now() - location.timestamp) > 60000) {
-                location = await Location.getCurrentPositionAsync({
-                    accuracy: Location.Accuracy.Balanced,
-                });
-            }
-            return { latitude: location.coords.latitude, longitude: location.coords.longitude };
-        }
-        catch (error) {
-            console.error("Error requesting location permission:", error);
-            return null;
-        }
-    };
-
     // Function to fetch all posts in radius
     const fetchPosts = async () => {
         setRefreshing(true);
-        const location = await getLocation();
-        if (!location) {
-            setRefreshing(false);
-            return;
-        }
 
         const source = axios.CancelToken.source();
 
         try {
-            console.log("Fetching Posts at: ", location);
+            console.log("Fetching Saved Posts...");
             const authToken = await SecureStore.getItemAsync("authToken");
             if (!authToken) {
                 console.log("No auth token found");
@@ -106,19 +72,17 @@ export default function PostFeed() {
                 return;
             }
 
-            const response = await axios.get(`http://99.32.47.49:3000/posts`, {
-                params: {
-                    latitude: location.latitude,
-                    longitude: location.longitude,
-                    radius: 5000,
-                },
+            const response = await axios.get(`http://99.32.47.49:3000/users/me/saved`, {
                 headers: {
                     'Authorization': authToken,
                 },
                 timeout: 5000,
             });
-
-            const data: Post[] = response.data;
+            console.log("Response: ", response.data);
+            const data: Post[] = response.data.map(post => ({
+                ...post,
+                flairs: typeof post.flairs === 'string' ? JSON.parse(post.flairs) : [],
+            }));
             console.log("Fetched Posts: ", data);
             setPosts(data);
             setPostIds(data.map(post => post.postid));
@@ -133,6 +97,38 @@ export default function PostFeed() {
         }
         finally {
             setRefreshing(false);
+        }
+    };
+
+    const unsavePost = async (postid: string) => {
+        const authToken = await SecureStore.getItemAsync("authToken");
+        if (!authToken) {
+            console.log("No auth token found");
+            return;
+        }
+
+        try
+        {
+            const response = await axios.delete(`http://99.32.47.49:3000/posts/${postid}/save`, {
+                headers: {
+                    'Authorization': authToken,
+                },
+                timeout: 5000,
+            });
+        }
+        catch (error)
+        {
+            console.error("Error saving post:", error);
+        }
+        finally
+        {
+            // Fetch posts again to update the list
+            fetchPosts();
+            // send toast that the post was saved
+            Toast.show({
+                type: 'success',
+                text1: 'Post Unsaved',
+              });
         }
     };
 
@@ -231,44 +227,12 @@ export default function PostFeed() {
         await fetchPosts();
     }, []);
 
-    const savePost = async (postid: string) => {
-        const authToken = await SecureStore.getItemAsync("authToken");
-        if (!authToken) {
-            console.log("No auth token found");
-            return;
-        }
-
-        try
-        {
-            const response = await axios.post(`http://99.32.47.49:3000/posts/${postid}/save`, {}, {
-                headers: {
-                    'Authorization': authToken,
-                },
-                timeout: 5000,
-            });
-        }
-        catch (error)
-        {
-            console.error("Error saving post:", error);
-        }
-        finally
-        {
-            fetchUserReactions();
-            getCountOfInteractions(postid);
-            // send toast that the post was saved
-            Toast.show({
-                type: 'success',
-                text1: 'Post Saved',
-              });
-        }
-    };
-
     // Render Post function
     const renderPost = ({ item }: { item: Post }) => {
         const interaction = interactionCounts[item.postid] || { likes: 0, dislikes: 0, comments: 0 };
 
         return (
-            <TouchableOpacity style={styles.postWrapper} onPress={() => postClickHandler(item)} onLongPress={() => savePost(item.postid)} delayLongPress={500}>
+            <TouchableOpacity style={styles.postWrapper} onPress={() => postClickHandler(item)} onLongPress={() => unsavePost(item.postid)} delayLongPress={500}>
                 <View style={styles.postContainer}>
                     {item.flairs.length > 0 && (
                         <View style={styles.flairsContainer}>
@@ -334,11 +298,6 @@ export default function PostFeed() {
         else return `${seconds} second${seconds > 1 ? "s" : ""}`;
     };
 
-    // Function to navigate to the create post screen
-    const navigateToCreatePost = () => {
-        navigation.navigate('CreatePost', {parentid: '-1',});
-    };
-
     // Click handler for the post
     const postClickHandler = (post: Post) => {
         // console.log(`Post Clicked: ${post.postid}`);
@@ -359,17 +318,6 @@ export default function PostFeed() {
                     />
                 }
             />
-
-            <TouchableOpacity
-                style={styles.button}
-                onPress={() => navigation.navigate('AccountScreen')}
-            >
-                <Text style={styles.buttonText}>Go to Account</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.createPostButton} onPress={navigateToCreatePost}>
-                <AntDesign name="plus" size={24} color="black" />
-            </TouchableOpacity>
         </View>
     );
 

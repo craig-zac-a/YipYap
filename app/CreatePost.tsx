@@ -67,7 +67,8 @@ export default function CreatePost({ route }: any) {
 
     const sendOriginalPost = async () => {
         const location = await getLocation();
-        if(!location || (message.length == 0 && img == null)) return;
+        // if(!location || (message.length == 0 && img == null)) return; // For when pictures work
+        if(!location || message.length == 0) return;
         try
         {
             const authToken = await SecureStore.getItemAsync("authToken");
@@ -94,7 +95,8 @@ export default function CreatePost({ route }: any) {
     }
 
     const sendCommentPost = async () => {
-        if (message.length == 0 && img == null) return;
+        // if (message.length == 0 && img == null) return; // For when pictures work
+        if (message.length == 0) return;
         try {
             const authToken = await SecureStore.getItemAsync("authToken");
 
